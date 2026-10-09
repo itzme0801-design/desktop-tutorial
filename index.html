@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Hunting Will - Smart Education and gamified companion designed for slow learners. Learn at your own pace with evolving avatars, visual mindmaps, CGPA tracking, attendance manager, and in-app AI doubt solver.">
+  <title>Hunting Will | Smart Education & Gamified Companion for Slow Learners</title>
+  
+  <!-- Modern Typography from Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons for crisp UI icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="dark-theme">
+  <!-- Interactive Canvas Particle Background -->
+  <canvas id="ambient-canvas"></canvas>
+
+  <!-- Notification Toast Container -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <!-- App Wrapper -->
+  <div class="app-layout">
+    
+    <!-- Top Bar / Header -->
+    <header class="app-header">
+      <div class="header-left">
+        <div class="brand-container">
+          <div class="brand-logo-glow">
+            <i class="fa-solid fa-bolt-lightning brand-icon"></i>
+          </div>
+          <div>
+            <h1 class="brand-title">Hunting <span class="text-gradient">Will</span></h1>
+            <p class="brand-subtitle">Smart Education • Built for Unstoppable Learners</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ambient Motivational Quote Ticker -->
+      <div class="quote-ticker-banner" id="quote-banner">
+        <i class="fa-solid fa-quote-left quote-icon"></i>
+        <span id="current-quote" class="quote-text">"You don't need to be the fastest runner, just stay on the track. Slow growth is still permanent growth."</span>
+        <button id="next-quote-btn" class="icon-btn-minimal" title="Next Motivational Boost"><i class="fa-solid fa-shuffle"></i></button>
+      </div>
+
+      <!-- Header Controls & Status -->
+      <div class="header-right">
+        <!-- Audio Ambience Generator (Lo-Fi Study Sound) -->
+        <div class="audio-control-pill" title="Lo-Fi Study Binaural Focus Ambience">
+          <button id="toggle-audio-btn" class="pill-btn">
+            <i class="fa-solid fa-headphones"></i>
+            <span id="audio-label">Lo-Fi Study Focus</span>
+          </button>
+          <input type="range" id="audio-volume" min="0" max="100" value="30" title="Ambience Volume">
+        </div>
+
+        <!-- Coins Counter -->
+        <div class="coins-pill" id="header-coins-pill" title="Will Coins - Earn by studying & redeem for Exam Hacks!">
+          <span class="coin-icon-wrapper">
+            <i class="fa-solid fa-coins coin-spin"></i>
+          </span>
+          <span class="coin-amount" id="user-coins-display">350</span>
+          <span class="coin-label">Coins</span>
+        </div>
+
+        <!-- Mini Active Avatar Profile Preview -->
+        <div class="profile-preview-card" id="open-avatar-modal-btn" title="Click to customize avatar & character">
+          <div class="avatar-ring" id="header-avatar-ring">
+            <img src="assets/nova.jpg" alt="Selected Avatar" id="header-avatar-img">
+          </div>
+          <div class="profile-info-mini">
+            <span class="profile-name" id="header-char-name">Nova</span>
+            <span class="profile-lvl-badge" id="header-char-lvl">Lvl 2 • Scholar</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Navigation Bar -->
+    <nav class="main-nav-bar" aria-label="Main Navigation">
+      <div class="nav-links-wrapper">
+        <button class="nav-tab-btn active" data-tab="tab-character">
+          <i class="fa-solid fa-gamepad"></i>
+          <span>Avatar & Quests</span>
+        </button>
+        <button class="nav-tab-btn" data-tab="tab-academics">
+          <i class="fa-solid fa-chart-line"></i>
+          <span>CGPA & Year Map</span>
+        </button>
+        <button class="nav-tab-btn" data-tab="tab-mindmaps">
+          <i class="fa-solid fa-diagram-project"></i>
+          <span>Mindmaps & Notes</span>
+        </button>
+        <button class="nav-tab-btn" data-tab="tab-attendance">
+          <i class="fa-solid fa-calendar-check"></i>
+          <span>Attendance & Calendar</span>
+        </button>
+        <button class="nav-tab-btn" data-tab="tab-chatgbp">
+          <i class="fa-solid fa-robot"></i>
+          <span>ChatGBP AI Tutor</span>
+          <span class="badge-pulse">ELI5</span>
+        </button>
+        <button class="nav-tab-btn" data-tab="tab-vault">
+          <i class="fa-solid fa-key"></i>
+          <span>Exam Secret Vault</span>
+          <span class="badge-hot">Hacks</span>
+        </button>
+      </div>
+
+      <!-- Mindset Toggle: Anti-Topper POV mode -->
+      <div class="pov-toggle-container">
+        <label class="switch-label" title="Switch between 'Toxic Topper Comparison' and 'Healthy Self-Growth' perspective">
+          <span class="switch-text"><i class="fa-solid fa-shield-heart"></i> Anti-Topper Mode</span>
+          <input type="checkbox" id="anti-topper-toggle" checked>
+          <span class="slider round"></span>
+        </label>
+      </div>
+    </nav>
+
+    <!-- Notification Bar for Anti-Topper POV Encouragement -->
+    <div class="pov-banner" id="pov-banner">
+      <div class="pov-banner-content">
+        <i class="fa-solid fa-heart-circle-check"></i>
+        <span><strong>You vs. Yesterday:</strong> Forget topper pressure. In Hunting Will, ranking doesn't define intelligence. Focus on your 1% daily upgrade and deep visual understanding!</span>
+      </div>
+      <button class="banner-close-btn" id="close-pov-banner">&times;</button>
+    </div>
+
+    <!-- Main Content Area -->
+    <main class="content-container">
+
+      <!-- ================= TAB 1: AVATAR & QUESTS ================= -->
+      <section id="tab-character" class="tab-pane active">
+        <div class="tab-grid-character">
+          
+          <!-- Character Card & Evolution Showcase -->
+          <div class="glass-card character-showcase-card">
+            <div class="card-header-flex">
+              <div>
+                <span class="section-tag"><i class="fa-solid fa-sparkles"></i> Gen-Z Companion</span>
+                <h2 class="card-title">My Animated Persona</h2>
+              </div>
+              <button class="btn-secondary btn-sm" id="change-character-btn">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> Switch Character
+              </button>
+            </div>
+
+            <!-- Character Display Arena -->
+            <div class="avatar-arena">
+              <div class="avatar-stage">
+                <!-- Glowing Energy Aura -->
+                <div class="energy-aura" id="character-aura"></div>
+                <div class="avatar-portrait-frame" id="character-portrait-frame">
+                  <img src="assets/nova.jpg" alt="Active Character" id="active-character-portrait" class="active-portrait">
+                  <!-- Evolution Badge Overlay -->
+                  <div class="evolution-tier-badge" id="char-tier-badge">
+                    <i class="fa-solid fa-fire"></i> Tier 2: Core Breaker
+                  </div>
+                </div>
+                <!-- Interactive Floating Runes / Effects -->
+                <div class="floating-rune rune-1">⚡</div>
+                <div class="floating-rune rune-2">✨</div>
+                <div class="floating-rune rune-3">🔮</div>
+              </div>
+
+              <!-- Character Stats & XP Progression -->
+              <div class="character-details-panel">
+                <div class="char-header-row">
+                  <div>
+                    <h3 class="char-name-large" id="char-name-display">Nova</h3>
+                    <p class="char-class-title" id="char-class-display">Cyber Tech Prodigy • High Focus Agility</p>
+                  </div>
+                  <div class="char-level-circle">
+                    <span class="lvl-number" id="char-level-display">2</span>
+                    <span class="lvl-text">LEVEL</span>
+                  </div>
+                </div>
+
+                <p class="char-quote-bubble" id="char-quote-display">
+                  "Take your time, fellow Hunter! Even quantum computers process one instruction at a time."
+                </p>
+
+                <!-- XP Bar -->
+                <div class="xp-section">
+                  <div class="xp-label-row">
+                    <span>Experience Progress</span>
+                    <span id="char-xp-text">780 / 1000 XP</span>
+                  </div>
+                  <div class="progress-bar-track">
+                    <div class="progress-bar-fill" id="char-xp-bar" style="width: 78%;"></div>
+                  </div>
+                  <small class="xp-hint">Earn +50 XP per attendance check, +150 XP per course milestone!</small>
+                </div>
+
+                <!-- Level Up Action -->
+                <div class="char-actions-row">
+                  <button class="btn-primary" id="claim-study-xp-btn">
+                    <i class="fa-solid fa-bolt"></i> Log 1 Study Hour (+60 XP, +25 Coins)
+                  </button>
+                  <button class="btn-accent" id="trigger-evolution-btn">
+                    <i class="fa-solid fa-shield-halved"></i> Evolve Gear (Cost: 100 Coins)
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Evolution Tier Road -->
+            <div class="evolution-roadmap-preview">
+              <h4 class="subheading-sm">Character Evolution Mastery Track</h4>
+              <div class="tier-steps">
+                <div class="tier-step completed">
+                  <div class="tier-step-icon"><i class="fa-solid fa-seedling"></i></div>
+                  <div class="tier-step-info">
+                    <strong>Tier 1: Spark</strong>
+                    <span>College Year 1 (Foundations)</span>
+                  </div>
+                </div>
+                <div class="tier-step active">
+                  <div class="tier-step-icon"><i class="fa-solid fa-bolt"></i></div>
+                  <div class="tier-step-info">
+                    <strong>Tier 2: Core Breaker</strong>
+                    <span>College Year 2 (DSA & Core)</span>
+                  </div>
+                </div>
+                <div class="tier-step locked">
+                  <div class="tier-step-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                  <div class="tier-step-info">
+                    <strong>Tier 3: Aura Knight</strong>
+                    <span>College Year 3 (Specialization)</span>
+                  </div>
+                </div>
+                <div class="tier-step locked">
+                  <div class="tier-step-icon"><i class="fa-solid fa-crown"></i></div>
+                  <div class="tier-step-info">
+                    <strong>Tier 4: Grand Archon</strong>
+                    <span>College Year 4 (Boss Placements)</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Monthly & Yearly Quest Hub (Healthy Competition Without Stress) -->
+          <div class="glass-card quest-hub-card">
+            <div class="card-header-flex">
+              <div>
+                <span class="section-tag tag-purple"><i class="fa-solid fa-bullseye"></i> Milestones & Quests</span>
+                <h2 class="card-title">Healthy Pace Milestones</h2>
+              </div>
+              <button class="btn-secondary btn-sm" id="add-custom-goal-btn">
+                <i class="fa-solid fa-plus"></i> Add Goal
+              </button>
+            </div>
+
+            <p class="card-desc">
+              Complete certificates at your comfortable speed. Private goals keep you motivated without toxic comparisons!
+            </p>
+
+            <!-- Monthly Certificate Sprint Target -->
+            <div class="monthly-sprint-box">
+              <div class="sprint-header">
+                <div>
+                  <span class="badge-accent"><i class="fa-solid fa-calendar-day"></i> This Month's Target</span>
+                  <h3 class="sprint-title">Complete 1 Core Skill Certificate</h3>
+                </div>
+                <span class="sprint-timer" id="sprint-timer-days">21 Days Remaining</span>
+              </div>
+              <p class="sprint-detail">e.g., Python Basics, Web Foundations, or Database Fundamentals on Coursera/FreeCodeCamp.</p>
+              
+              <div class="sprint-progress-wrapper">
+                <div class="progress-bar-track">
+                  <div class="progress-bar-fill fill-glow" id="monthly-cert-progress" style="width: 65%;"></div>
+                </div>
+                <div class="sprint-meta-row">
+                  <span>Current Status: <strong>Module 3 of 4 Done</strong></span>
+                  <button class="btn-success btn-xs" id="complete-monthly-cert-btn">
+                    <i class="fa-solid fa-check"></i> Mark Complete (+200 Coins)
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- End of Year Target Track -->
+            <div class="yearly-target-box">
+              <div class="yearly-header">
+                <div>
+                  <h4 class="yearly-title"><i class="fa-solid fa-trophy text-gold"></i> End-of-Year Target: 4 Certifications</h4>
+                  <p class="yearly-sub">Healthy annual growth benchmark (You vs Your previous record)</p>
+                </div>
+                <span class="yearly-counter" id="yearly-cert-count">2 / 4 Finished</span>
+              </div>
+              
+              <div class="cert-chips-grid">
+                <div class="cert-chip completed">
+                  <i class="fa-solid fa-circle-check"></i>
+                  <span>Jan: Git & Linux Essentials</span>
+                  <span class="chip-status">Done</span>
+                </div>
+                <div class="cert-chip completed">
+                  <i class="fa-solid fa-circle-check"></i>
+                  <span>Mar: Responsive Web UI</span>
+                  <span class="chip-status">Done</span>
+                </div>
+                <div class="cert-chip in-progress">
+                  <i class="fa-solid fa-spinner fa-spin"></i>
+                  <span>Oct: Data Structures Primer</span>
+                  <span class="chip-status">In Flight</span>
+                </div>
+                <div class="cert-chip locked">
+                  <i class="fa-solid fa-lock"></i>
+                  <span>Dec: Full Stack Mini Project</span>
+                  <span class="chip-status">Target</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Daily & Weekly Private Quests List -->
+            <div class="quests-list-container">
+              <h4 class="subheading-sm">Active Private Quests</h4>
+              <ul class="quest-items" id="quest-items-list">
+                <!-- Dynamically Rendered -->
+              </ul>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ================= TAB 2: CGPA & YEAR MAP ================= -->
+      <section id="tab-academics" class="tab-pane">
+        <div class="tab-grid-academics">
+          
+          <!-- CGPA & SGPA Health Dashboard -->
+          <div class="glass-card gpa-dashboard-card">
+            <div class="card-header-flex">
+              <div>
+                <span class="section-tag tag-cyan"><i class="fa-solid fa-graduation-cap"></i> Academic Metrics</span>
+                <h2 class="card-title">CGPA & SGPA Growth Center</h2>
+              </div>
+              <span class="badge-status-good"><i class="fa-solid fa-arrow-trend-up"></i> Steady Improvement</span>
+            </div>
+
+            <!-- Anti-Topper Perspective Notice -->
+            <div class="pov-perspective-card" id="anti-topper-card">
+              <div class="pov-badge">Hunting Will Mindset</div>
+              <p>
+                <strong>Traditional College:</strong> <em>"Topper scored 9.8, you only got 7.1, you are falling behind."</em><br>
+                <strong>Our Smart Education:</strong> <em>"You improved from 6.3 in Sem 1 to 7.4 in Sem 3! That is a +1.1 jump! Your personal momentum is exceptional!"</em>
+              </p>
+            </div>
+
+            <!-- Big Stat Rings -->
+            <div class="gpa-stats-grid">
+              <div class="stat-box-interactive">
+                <span class="stat-caption">Cumulative GPA (CGPA)</span>
+                <div class="stat-number-flex">
+                  <span class="stat-val" id="current-cgpa-display">7.42</span>
+                  <span class="stat-max">/ 10.0</span>
+                </div>
+                <div class="stat-delta positive">
+                  <i class="fa-solid fa-caret-up"></i> +0.48 vs Year 1
+                </div>
+              </div>
+
+              <div class="stat-box-interactive">
+                <span class="stat-caption">Target Graduation CGPA</span>
+                <div class="stat-number-flex">
+                  <span class="stat-val text-gold" id="target-cgpa-display">8.00</span>
+                  <span class="stat-max">/ 10.0</span>
+                </div>
+                <div class="stat-meta">Realistic & achievable pace</div>
+              </div>
+
+              <div class="stat-box-interactive">
+                <span class="stat-caption">Latest Semester SGPA</span>
+                <div class="stat-number-flex">
+                  <span class="stat-val text-cyan" id="latest-sgpa-display">7.80</span>
+                  <span class="stat-max">/ 10.0</span>
+                </div>
+                <div class="stat-delta positive">
+                  <i class="fa-solid fa-caret-up"></i> Best Semester Yet!
+                </div>
+              </div>
+            </div>
+
+            <!-- Semester Breakdown Chart & Calculator -->
+            <div class="semester-history-section">
+              <div class="section-title-row">
+                <h4 class="subheading-sm">Semester SGPA History & Smart Forecast</h4>
+                <button class="btn-minimal-link" id="edit-grades-btn"><i class="fa-solid fa-pen"></i> Update Sem Grades</button>
+              </div>
+
+              <!-- Bar visualizer -->
+              <div class="sem-bars-container" id="sem-bars-container">
+                <!-- Rendered dynamically -->
+              </div>
+
+              <!-- Smart SGPA Target Calculator -->
+              <div class="sgpa-calculator-box">
+                <h5 class="calc-title"><i class="fa-solid fa-calculator"></i> Smart SGPA Target Planner</h5>
+                <p class="calc-desc">To reach your target <strong>8.00 CGPA</strong>, what SGPA do you need in the upcoming semesters?</p>
+                <div class="calc-result-pill">
+                  <span class="calc-result-text">Required average for remaining 4 semesters: <strong class="text-glow-gold" id="req-sgpa-value">8.25 SGPA</strong></span>
+                  <span class="calc-advice">Completely achievable with 80/20 mindmaps and exam hacks!</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- College 4-Year Difficulty Comparison & Smart Hacks -->
+          <div class="glass-card college-roadmap-card">
+            <div class="card-header-flex">
+              <div>
+                <span class="section-tag tag-gold"><i class="fa-solid fa-stairs"></i> Easy to Hard Journey</span>
+                <h2 class="card-title">College 4-Year Difficulty Map</h2>
+              </div>
+              <span class="badge-info">Engineering & Tech</span>
+            </div>
+
+            <p class="card-desc">
+              Understand the difficulty curve in advance so you are never caught by surprise. Slow learners succeed when prepared early!
+            </p>
+
+            <!-- 4 Year Accordion / Steps -->
+            <div class="college-years-container">
+              
+              <!-- Year 1 -->
+              <div class="year-stage-card stage-easy">
+                <div class="stage-header">
+                  <div class="stage-badge-group">
+                    <span class="stage-num">Year 1</span>
+                    <span class="stage-difficulty diff-easy">Level: Foundation (⭐ Easy)</span>
+                  </div>
+                  <span class="stage-avatar-gear"><i class="fa-solid fa-seedling"></i> Novice Hunter</span>
+                </div>
+                <h3 class="stage-title">First Steps & Overcoming Fear of Basics</h3>
+                <p class="stage-overview">Physics, Basic Calculus, Intro to C/Python, Engineering Graphics.</p>
+                <div class="stage-tips-box">
+                  <strong>Smart Education Advice for Slow Learners:</strong>
+                  <ul>
+                    <li>Do not get intimidated by students who already know coding.</li>
+                    <li>Focus on mastering basic syntax and 1 math topic per week.</li>
+                    <li>Building a habit of 45-min daily study beats 10-hour all-nighters.</li>
+                  </ul>
+                </div>
+              </div>
+
+              <!-- Year 2 -->
+              <div class="year-stage-card stage-medium active-stage">
+                <div class="stage-header">
+                  <div class="stage-badge-group">
+                    <span class="stage-num">Year 2</span>
+                    <span class="stage-difficulty diff-medium">Level: Core Engineering (⭐⭐⭐ Medium-Hard)</span>
+                  </div>
+                  <span class="stage-avatar-gear"><i class="fa-solid fa-bolt"></i> Core Slayer (Your Current Level!)</span>
+                </div>
+                <h3 class="stage-title">The "Valley of Doubt" & Core Subjects</h3>
+                <p class="stage-overview">Data Structures, Algorithms, Discrete Maths, Digital Logic, OOPs.</p>
+                <div class="stage-tips-box">
+                  <strong>Smart Education Advice for Slow Learners:</strong>
+                  <ul>
+                    <li>This is where most slow learners feel overwhelmed by abstract theory.</li>
+                    <li><strong>Solution:</strong> Use our visual Mindmaps instead of memorizing 500-page books.</li>
+                    <li>Trace data structures on paper with diagrams (boxes, arrows).</li>
+                  </ul>
+                </div>
+              </div>
+
+              <!-- Year 3 -->
+              <div class="year-stage-card stage-hard">
+                <div class="stage-header">
+                  <div class="stage-badge-group">
+                    <span class="stage-num">Year 3</span>
+                    <span class="stage-difficulty diff-hard">Level: High Voltage (⭐⭐⭐⭐ Hard)</span>
+                  </div>
+                  <span class="stage-avatar-gear"><i class="fa-solid fa-shield-halved"></i> Aura Knight</span>
+                </div>
+                <h3 class="stage-title">Deep Specialization & Real Projects</h3>
+                <p class="stage-overview">Operating Systems, DBMS, Computer Networks, System Architecture, Mini-Projects.</p>
+                <div class="stage-tips-box">
+                  <strong>Smart Education Advice for Slow Learners:</strong>
+                  <ul>
+                    <li>Connect theory with real apps (e.g. SQL with simple web apps).</li>
+                    <li>Do not try to build gigantic apps; build 2 clean, working projects with well-documented mindmaps.</li>
+                    <li>Redeem Will Coins to unlock 80/20 topic cheatsheets early.</li>
+                  </ul>
+                </div>
+              </div>
+
+              <!-- Year 4 -->
+              <div class="year-stage-card stage-boss">
+                <div class="stage-header">
+                  <div class="stage-badge-group">
+                    <span class="stage-num">Year 4</span>
+                    <span class="stage-difficulty diff-boss">Level: Boss Battle (⭐⭐⭐⭐⭐ Expert)</span>
+                  </div>
+                  <span class="stage-avatar-gear"><i class="fa-solid fa-crown"></i> Grand Archon</span>
+                </div>
+                <h3 class="stage-title">Capstone Thesis & Placement Gauntlet</h3>
+                <p class="stage-overview">Final Major Project, Aptitude, Core Technical Interviews, System Design.</p>
+                <div class="stage-tips-box">
+                  <strong>Smart Education Advice for Slow Learners:</strong>
+                  <ul>
+                    <li>Interviewers love slow learners who show persistence and deep conceptual clarity over rote memorizers!</li>
+                    <li>Keep your portfolio concise and speak clearly about the projects you built with passion.</li>
+                  </ul>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ================= TAB 3: MINDMAPS & VISUAL NOTES ================= -->
+      <section id="tab-mindmaps" class="tab-pane">
+        <div class="tab-grid-mindmaps">
+          
+          <!-- Mindmap Showcase & Interactive Visualizer -->
+          <div class="glass-card mindmap-viewer-card">
+            <div class="card-header-flex">
+              <div>
+                <span class="section-tag tag-green"><i class="fa-solid fa-network-wired"></i> Visual Learning</span>
+                <h2 class="card-title">Interactive Topic Mindmap</h2>
+              </div>
+              
+              <!-- Mindmap Topic Selector -->
+              <div class="mindmap-controls">
+                <select id="mindmap-topic-select" class="dropdown-styled">
+                  <option value="dsa">Data Structures: Trees & Graphs Simplified</option>
+                  <option value="os">Operating Systems: Deadlock & Concurrency</option>
+                  <option value="dbms">DBMS: Normalization & ACID Properties</option>
+                  <option value="cn">Computer Networks: OSI 7-Layer Flow</option>
+                </select>
+                <button class="btn-secondary btn-sm" id="zoom-reset-btn" title="Reset View"><i class="fa-solid fa-arrows-rotate"></i> Reset</button>
+              </div>
+            </div>
+
+            <!-- Slow Learner Advantage Banner -->
+            <div class="slow-learner-perk-banner">
+              <div class="perk-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+              <div class="perk-text">
+                <strong>Why Mindmaps Beat 50-Page Notes:</strong> While regular students get exhausted copying endless handwritten notes from class, you can comprehend the entire architecture in 1 glance through visual concept nodes!
+              </div>
+            </div>
+
+            <!-- Mindmap Canvas / Interactive Graph -->
+            <div class="mindmap-canvas-container" id="mindmap-container">
+              <svg id="mindmap-svg" class="mindmap-svg" width="100%" height="480"></svg>
+              <div class="mindmap-legend">
+                <span class="legend-item"><span class="dot root"></span> Core Concept</span>
+                <span class="legend-item"><span class="dot branch"></span> Key Branch</span>
+                <span class="legend-item"><span class="dot leaf"></span> 80/20 Exam Focus</span>
+              </div>
+            </div>
+
+            <!-- Node Detail Insight Drawer -->
+            <div class="node-insight-box" id="node-insight-box">
+              <div class="insight-header">
+                <span class="badge-mini" id="insight-badge">Core Concept</span>
+                <h4 id="insight-title" class="insight-title">Click any node above to inspect quick summary</h4>
+              </div>
+              <p id="insight-body" class="insight-body">
+                Select any connected node in the visual mindmap to see its simplified slow-learner breakdown, real-world metaphor, and exam priority!
+              </p>
+            </div>
+          </div>
+
+          <!-- Community Mindmaps & Hand-Drawn Notes Hub -->
+          <div class="glass-card notes-hub-card">
+            <div class="card-header-flex">
+              <div>
+                <span class="section-tag tag-purple"><i class="fa-solid fa-book-open-reader"></i> Visual Library</span>
+                <h2 class="card-title">Shared Mindmap Notes</h2>
+              </div>
+              <button class="btn-primary btn-sm" id="upload-note-btn">
+                <i class="fa-solid fa-cloud-arrow-up"></i> Share Mindmap
+              </button>
+            </div>
+
+            <p class="card-desc">
+              Curated visual summaries created by slow learners for slow learners. No overwhelming text walls.
+            </p>
+
+            <!-- Search and Filter -->
+            <div class="search-notes-bar">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" id="search-notes-input" placeholder="Search mindmap (e.g. Recursion, SQL, Sorting)...">
+            </div>
+
+            <!-- Notes Cards Grid -->
+            <div class="notes-library-list" id="notes-library-list">
+              <!-- Rendered Dynamically -->
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ================= TAB 4: ATTENDANCE & CALENDAR ================= -->
+      <section id="tab-attendance" class="tab-pane">
+        <div class="tab-grid-attendance">
+          
+          <!-- Attendance Tracking & Safe-Bunk Calculator -->
+          <div class="glass-card attendance-card">
+            <div class="card-header-flex">
+              <div>
+                <span class="section-tag tag-cyan"><i class="fa-solid fa-clipboard-user"></i> Daily Tracker</span>
+                <h2 class="card-title">Smart Attendance Log</h2>
+              </div>
+              <button class="btn-secondary btn-sm" id="add-subject-btn">
+                <i class="fa-solid fa-plus"></i> Add Subject
+              </button>
+            </div>
+
+            <p class="card-desc">
+              Stay safely above the university 75% attendance threshold without constant anxiety. Instant calculations show safe bunks!
+            </p>
+
+            <!-- Overall Attendance Summary Pill -->
+            <div class="overall-attendance-summary">
+              <div class="summary-left">
+                <span class="summary-label">Overall Semester Attendance</span>
+                <div class="summary-big-pct" id="overall-attendance-pct">78.5%</div>
+                <div class="summary-status-pill safe" id="overall-status-pill">
+                  <i class="fa-solid fa-circle-check"></i> Safe Zone (>75% Met)
+                </div>
+              </div>
+              <div class="summary-right">
+                <div class="stat-mini">
+                  <span>Classes Attended:</span>
+                  <strong id="total-attended-count">110</strong>
+                </div>
+                <div class="stat-mini">
+                  <span>Total Classes Held:</span>
+                  <strong id="total-held-count">140</strong>
+                </div>
+                <div class="stat-mini">
+                  <span>Coins Earned from Attendance:</span>
+                  <strong class="text-gold" id="attendance-coins-count">+180 🪙</strong>
+                </div>
+              </div>
+            </div>
+
+            <!-- Subject-wise Attendance List -->
+            <div class="subjects-list-container" id="subjects-list-container">
+              <!-- Rendered Dynamically -->
+            </div>
+          </div>
+
+          <!-- Interactive Calendar & Reminders Schedule -->
+          <div class="glass-card calendar-card">
+            <div class="card-header-flex">
+              <div>
+                <span class="section-tag tag-gold"><i class="fa-solid fa-calendar-days"></i> Time Keeper</span>
+                <h2 class="card-title">Calendar & Reminders</h2>
+              </div>
+              <button class="btn-primary btn-sm" id="add-reminder-btn">
+                <i class="fa-solid fa-bell"></i> Add Reminder
+              </button>
+            </div>
+
+            <!-- Calendar Month Header -->
+            <div class="calendar-header-nav">
+              <button class="calendar-nav-btn" id="cal-prev-btn"><i class="fa-solid fa-chevron-left"></i></button>
+              <h3 class="calendar-month-title" id="cal-month-title">October 2026</h3>
+              <button class="calendar-nav-btn" id="cal-next-btn"><i class="fa-solid fa-chevron-right"></i></button>
+            </div>
+
+            <!-- Calendar Grid -->
+            <div class="calendar-grid-wrapper">
+              <div class="calendar-weekdays">
+                <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
+              </div>
+              <div class="calendar-days-grid" id="calendar-days-grid">
+                <!-- Rendered Dynamically -->
+              </div>
+            </div>
+
+            <!-- Reminders & Events List for Selected Day -->
+            <div class="reminders-section">
+              <div class="reminders-header-row">
+                <h4 class="subheading-sm" id="selected-date-heading">Reminders for Today</h4>
+                <span class="badge-mini" id="reminder-count-badge">3 Events</span>
+              </div>
+              <ul class="reminders-list" id="reminders-list">
+                <!-- Rendered dynamically -->
+              </ul>
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ================= TAB 5: CHATGBP (AI DOUBT SOLVER) ================= -->
+      <section id="tab-chatgbp" class="tab-pane">
+        <div class="chatgbp-layout">
+          
+          <div class="glass-card chatgbp-card">
+            <div class="chat-header-bar">
+              <div class="chat-bot-identity">
+                <div class="bot-avatar-pulse">
+                  <i class="fa-solid fa-brain"></i>
+                </div>
+                <div>
+                  <h3 class="bot-name">ChatGBP <span class="badge-accent">Smart Tutor</span></h3>
+                  <p class="bot-status"><i class="fa-solid fa-circle text-emerald"></i> Online • Never judges, explains gently</p>
+                </div>
+              </div>
+
+              <!-- Persona / Mode Selector -->
+              <div class="chat-mode-selector">
+                <span class="mode-label"><i class="fa-solid fa-sliders"></i> Mode:</span>
+                <select id="chat-mode-select" class="dropdown-styled-sm">
+                  <option value="eli5">🐣 Explain Like I'm 5 (ELI5)</option>
+                  <option value="mindmap">🧠 Visual Mindmap Breakdown</option>
+                  <option value="exam">⚡ Exam Fast-Pass (80/20 Core)</option>
+                  <option value="cheer">💖 Confidence Booster & Pep Talk</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Chat Messages Log -->
+            <div class="chat-messages-container" id="chat-messages-container">
+              <!-- Bot Greeting -->
+              <div class="chat-bubble bot-bubble">
+                <div class="bubble-sender">
+                  <i class="fa-solid fa-robot"></i> ChatGBP
+                </div>
+                <div class="bubble-content">
+                  Hey there! 👋 I am your private doubt solver in <strong>Hunting Will</strong>. 
+                  <br><br>
+                  There are <strong>zero dumb questions</strong> here. If professors or toppers made you feel confused with 50-page textbooks, ask me! I will explain with everyday analogies, simple drawings, or short bullet points.
+                  <br><br>
+                  Try clicking one of the common doubts below or type whatever is on your mind!
+                </div>
+                <div class="bubble-time">Just now</div>
+              </div>
+            </div>
+
+            <!-- Quick Doubt Prompts Chips -->
+            <div class="quick-prompts-row" id="quick-prompts-row">
+              <button class="prompt-chip" data-query="Explain recursion without hurting my brain">💡 Recursion simply explained</button>
+              <button class="prompt-chip" data-query="How does Pointers in C work in real life?">🎯 Pointers in C analogy</button>
+              <button class="prompt-chip" data-query="Why do we need Normalization in DBMS?">🗄️ DBMS Normalization ELI5</button>
+              <button class="prompt-chip" data-query="I feel demotivated because my friends learn faster than me">❤️ Feeling demotivated advice</button>
+            </div>
+
+            <!-- Chat Input Bar -->
+            <div class="chat-input-area">
+              <form id="chat-form" class="chat-form">
+                <input type="text" id="chat-user-input" class="chat-input-field" placeholder="Ask any doubt (e.g., 'Explain binary search like I am a kid')..." autocomplete="off">
+                <button type="submit" class="chat-send-btn" id="chat-send-btn" title="Send Question">
+                  <i class="fa-solid fa-paper-plane"></i>
+                </button>
+              </form>
+              <div class="chat-footer-caption">
+                <i class="fa-solid fa-shield-halved"></i> 100% Private • No judgment • Answers tuned for intuitive visual grasp
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ================= TAB 6: EXAM SECRET VAULT ================= -->
+      <section id="tab-vault" class="tab-pane">
+        <div class="vault-layout">
+          
+          <div class="glass-card vault-banner-card">
+            <div class="vault-banner-flex">
+              <div>
+                <span class="section-tag tag-gold"><i class="fa-solid fa-gem"></i> Will Vault</span>
+                <h2 class="card-title">Semester Exam Secret Tips & Hacks</h2>
+                <p class="card-desc">
+                  Redeem your earned <strong>Will Coins</strong> to unlock decoded university question patterns, high-yield topics, and last-minute survival protocols.
+                </p>
+              </div>
+
+              <div class="vault-wallet-box">
+                <span class="wallet-caption">Your Hunting Balance</span>
+                <div class="wallet-amount">
+                  <i class="fa-solid fa-coins text-gold"></i>
+                  <span id="vault-coins-amount">350</span> Coins
+                </div>
+                <button class="btn-primary btn-sm" id="earn-more-coins-btn">
+                  <i class="fa-solid fa-plus"></i> Earn More Coins
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Secret Tips Grid -->
+          <div class="tips-grid" id="tips-grid">
+            <!-- Dynamically populated -->
+          </div>
+
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Bottom Motivational Ribbon -->
+    <footer class="app-footer">
+      <div class="footer-quote">
+        <i class="fa-solid fa-feather-pointed"></i>
+        <span>"A slow pace with solid consistency will always outrun brilliant inconsistency." — Hunting Will Community</span>
+      </div>
+      <div class="footer-links">
+        <span>Smart Education Initiative</span>
+        <span>•</span>
+        <span>Anti-Topper Paradigm</span>
+        <span>•</span>
+        <span>v2.4 Pro</span>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- ================= MODALS ================= -->
+
+  <!-- Modal 1: Character Switcher Modal -->
+  <div class="modal-backdrop" id="character-modal" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-header">
+        <div class="modal-title-flex">
+          <i class="fa-solid fa-masks-theater text-purple"></i>
+          <h3>Select Your Gen-Z Study Companion</h3>
+        </div>
+        <button class="modal-close-btn" id="close-character-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-instruction">
+          Choose the persona that resonates with your learning spirit. Each companion possesses custom animations, inspirational audio feedback, and aesthetic evolutions!
+        </p>
+        
+        <div class="character-selection-grid">
+          <!-- Nova -->
+          <div class="char-option-card active" data-char="nova">
+            <div class="char-thumb-wrapper">
+              <img src="assets/nova.jpg" alt="Nova">
+              <span class="char-select-badge"><i class="fa-solid fa-check"></i> Active</span>
+            </div>
+            <h4 class="char-opt-name">Nova</h4>
+            <span class="char-opt-trait">Cyber Runner • Fast Mind</span>
+            <p class="char-opt-bio">Loves breaking huge coding problems into bite-sized cyber missions.</p>
+          </div>
+
+          <!-- Aria -->
+          <div class="char-option-card" data-char="aria">
+            <div class="char-thumb-wrapper">
+              <img src="assets/aria.jpg" alt="Aria">
+              <span class="char-select-badge"><i class="fa-solid fa-check"></i> Select</span>
+            </div>
+            <h4 class="char-opt-name">Aria</h4>
+            <span class="char-opt-trait">Zen Alchemist • Cozy Vibe</span>
+            <p class="char-opt-bio">Gentle, calm pacing with lofi beats. Ideal for students with exam anxiety.</p>
+          </div>
+
+          <!-- Blitz -->
+          <div class="char-option-card" data-char="blitz">
+            <div class="char-thumb-wrapper">
+              <img src="assets/blitz.jpg" alt="Blitz">
+              <span class="char-select-badge"><i class="fa-solid fa-check"></i> Select</span>
+            </div>
+            <h4 class="char-opt-name">Blitz</h4>
+            <span class="char-opt-trait">Pixel Knight • Relentless Grinder</span>
+            <p class="char-opt-bio">High energy gamer motivation. Turns every semester into a boss battle to conquer!</p>
+          </div>
+
+          <!-- Kairo -->
+          <div class="char-option-card" data-char="kairo">
+            <div class="char-thumb-wrapper">
+              <img src="assets/kairo.jpg" alt="Kairo">
+              <span class="char-select-badge"><i class="fa-solid fa-check"></i> Select</span>
+            </div>
+            <h4 class="char-opt-name">Kairo</h4>
+            <span class="char-opt-trait">Cosmic Sage • Deep Thinker</span>
+            <p class="char-opt-bio">Emphasizes deep philosophical and visual comprehension over rote memorizing.</p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="cancel-char-select-btn">Cancel</button>
+        <button class="btn-primary" id="confirm-char-select-btn">Confirm Companion</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 2: Add Custom Reminder Modal -->
+  <div class="modal-backdrop" id="reminder-modal" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div class="modal-title-flex">
+          <i class="fa-solid fa-bell text-gold"></i>
+          <h3>Add Calendar Reminder</h3>
+        </div>
+        <button class="modal-close-btn" id="close-reminder-modal">&times;</button>
+      </div>
+      <form id="reminder-form">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="reminder-title-input">Reminder Title</label>
+            <input type="text" id="reminder-title-input" class="form-control" placeholder="e.g., Submit Python Mindmap Assignment" required>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="reminder-date-input">Date</label>
+              <input type="date" id="reminder-date-input" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label for="reminder-category-input">Category</label>
+              <select id="reminder-category-input" class="form-control">
+                <option value="exam">📝 Semester Exam</option>
+                <option value="assignment">📂 Assignment / Lab</option>
+                <option value="certificate">🎓 Course Milestone</option>
+                <option value="revision">🧠 Mindmap Revision</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" id="cancel-reminder-btn">Cancel</button>
+          <button type="submit" class="btn-primary">Save Reminder</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 3: Add Subject Modal (Attendance) -->
+  <div class="modal-backdrop" id="subject-modal" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div class="modal-title-flex">
+          <i class="fa-solid fa-book-bookmark text-cyan"></i>
+          <h3>Add Academic Subject</h3>
+        </div>
+        <button class="modal-close-btn" id="close-subject-modal">&times;</button>
+      </div>
+      <form id="subject-form">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="subject-name-input">Subject Name</label>
+            <input type="text" id="subject-name-input" class="form-control" placeholder="e.g., Database Management Systems" required>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="subject-attended-input">Classes Attended</label>
+              <input type="number" id="subject-attended-input" class="form-control" min="0" value="18" required>
+            </div>
+            <div class="form-group">
+              <label for="subject-total-input">Total Classes Held</label>
+              <input type="number" id="subject-total-input" class="form-control" min="1" value="22" required>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" id="cancel-subject-btn">Cancel</button>
+          <button type="submit" class="btn-primary">Add Subject</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 4: Unlock Vault Tip Modal -->
+  <div class="modal-backdrop" id="vault-modal" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-header">
+        <div class="modal-title-flex">
+          <i class="fa-solid fa-lock-open text-gold"></i>
+          <h3 id="vault-modal-title">Exam Secret Decoded</h3>
+        </div>
+        <button class="modal-close-btn" id="close-vault-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="unlocked-tip-content" id="vault-modal-content">
+          <!-- Injected dynamically -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-primary" id="done-vault-modal-btn">Got it! Keep Conquering</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confetti Canvas for Celebrations -->
+  <canvas id="confetti-canvas"></canvas>
+
+  <script src="app.js"></script>
+</body>
+</html>
